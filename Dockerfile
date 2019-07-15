@@ -3,13 +3,10 @@
 FROM golang:alpine as build-go
 
 # add all files of the current directoty to the container directoty
-ADD . /go/src
+ADD . /app
 
 # install all the necessary packages for the operation of our go application
-RUN apk update git &&\
-    apk add git &&\
-    go get github.com/pkg/errors &&\
-    go build -o btest ./src  
+RUN cd /app && go build -o goapp .  
 
 # step 2
 # main for goland container from images alpine
@@ -19,11 +16,10 @@ FROM alpine
 WORKDIR /app
 
 # copy bin in container 
-COPY --from=build-go /go/src /app/
+COPY --from=build-go /app/goapp /app/
 
-# sets the port to access outside, i.e. example when deploying a container from the image "docker run -p xxxx: 4444 demo"
-EXPOSE 4444
+# sets the port to access outside, i.e. example when deploying a container from the image "docker run -p 80:8082"
+EXPOSE 80
 
 # the command that will be executed when the container is expanded, the application start
-ENTRYPOINT ["/app"]
-
+ENTRYPOINT ["/app/goapp"]
